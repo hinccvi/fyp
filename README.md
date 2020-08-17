@@ -1,1 +1,1 @@
-# iothub-k8s-training
+# FYP - Smart Plant Monitoring System

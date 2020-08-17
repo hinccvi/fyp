@@ -1,34 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: iothub-k8s-dave-lee
+  name: fyp-thong-wan-hin
 spec:
   replicas: 1
   revisionHistoryLimit: 0
   selector:
     matchLabels:
       component: iothub
-      student: dave-lee
+      student: thong-wan-hin
   template:
     metadata:
       labels:
         component: iothub
-        student: dave-lee
+        student: thong-wan-hin
     spec:
       containers:
-        - name: mqtt
-          image: ensaas/iothub-demo:0.8.0
+        - name: iothub
+          image: hinccvi/fyp:v0.1
           resources:
             limits:
-              cpu: 20m
+              cpu: 50m
               memory: 64Mi
               ephemeral-storage: 64Mi
             requests:
-              cpu: 20m
+              cpu: 50m
               memory: 64Mi
-          env:
-            - name: ENSAAS_SERVICES
-              valueFrom:
-                secretKeyRef:
-                  name: iot-home-k8s-level2-secret
-                  key: ENSAAS_SERVICES

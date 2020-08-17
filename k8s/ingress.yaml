@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: fyp-thong-wan-hin
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+    - host: fyp-thong-wan-hin.my2.ews003.en.internal
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: fyp-thong-wan-hin
+              servicePort: 3000
