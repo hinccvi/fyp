@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: iothub
-          image: hinccvi/fyp:v0.1
+          image: hinccvi/fyp:v0.3
           resources:
             limits:
               cpu: 50m

@@ -14,7 +14,7 @@ CREATE SCHEMA IF NOT EXISTS "fyp";
 ALTER SCHEMA "fyp" OWNER TO "db-thong-wan-hin";
 CREATE TABLE IF NOT EXISTS "fyp"."plant"(
   id serial,
-  timestamp timestamp with time zone NOT NULL,
+  timestamp timestamp without time zone NOT NULL,
   input_1 real,
   input_2 real,
   input_3 real,

@@ -56,7 +56,7 @@ client.on('message', async (topic, message, packet) => {
   let status4 = msg.ai_st4;
 
   try {
-    await pool.query(sqlWriteValue, [time + '+08', input1, input2, input3, input4]);
+    await pool.query(sqlWriteValue, [time, input1, input2, input3, input4]);
     console.log(msg);
 
   } catch (err) {
