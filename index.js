@@ -55,12 +55,21 @@ client.on('message', async (topic, message, packet) => {
   let status3 = msg.ai_st3;
   let status4 = msg.ai_st4;
 
-  try {
-    await pool.query(sqlWriteValue, [time, input1, input2, input3, input4]);
-    console.log(msg);
+  let voltage = input2 * 5.0;
+  voltage /= 256.0;
+  voltage = (voltage - 0.6) * 46;
+  let temp = Math.round(-voltage);
 
-  } catch (err) {
-    console.error('Error adding data...', err.stack);
+  let ph = input4 * 5.0 / 1024.0 / 6;
+  ph = 3.5 * ph + 7;
+  ph = Math.round(ph);
+
+  if (time != null) {
+    try {
+      await pool.query(sqlWriteValue, [time, input1, temp, input3, ph]);
+    } catch (err) {
+      console.error('Error adding data...', err.stack);
+    }
   }
 
 });
@@ -74,6 +83,12 @@ client.on('offline', () => logger("[MQTT]: offline"));
 function logger(s) {
   console.log(Date() + ' -- ' + s);
 }
+
+app.get('/', async (req, res) => {
+
+  res.status(200).send('Working fine.');
+
+});
 
 // Creates the schema and table and sets the permission base on 'group'
 app.get('/create_table', async (req, res) => {
