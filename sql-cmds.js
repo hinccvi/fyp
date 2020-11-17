@@ -1,4 +1,4 @@
-module.exports.sqlWriteValue = 'INSERT INTO fyp.plant(timestamp, input_1, input_2, input_3, input_4) VALUES($1, $2, $3, $4, $5)';
+module.exports.sqlWriteValue = 'INSERT INTO fyp.plant(timestamp, moisture, temperature, waterlv, phlv, health) VALUES($1, $2, $3, $4, $5, $6)';
 
 module.exports.sqlQueryTemps = `
 SELECT * 
@@ -15,10 +15,12 @@ ALTER SCHEMA "fyp" OWNER TO "db-thong-wan-hin";
 CREATE TABLE IF NOT EXISTS "fyp"."plant"(
   id serial,
   timestamp timestamp without time zone NOT NULL,
-  input_1 real,
-  input_2 real,
-  input_3 real,
-  input_4 real,
+  moisture real,
+  temperature real,
+  waterlv real,
+  phlv real,
+  health real,
+
   PRIMARY KEY (id)
 );
 ALTER TABLE "fyp"."plant" OWNER to "db-thong-wan-hin";

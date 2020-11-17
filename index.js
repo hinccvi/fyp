@@ -4,6 +4,8 @@ const moment = require('moment');
 const { Pool } = require('pg');
 const { sqlCreatTable, sqlQueryTemps, sqlWriteValue, sqlDeleteData } = require('./sql-cmds');
 const app = express();
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 // Credentials for connecting to the postgresql server
 const pgConnOpt = {
@@ -50,23 +52,61 @@ client.on('message', async (topic, message, packet) => {
   let input2 = parseFloat(msg.ai2);
   let input3 = parseFloat(msg.ai3);
   let input4 = parseFloat(msg.ai4);
-  let status1 = msg.ai_st1;
-  let status2 = msg.ai_st2;
-  let status3 = msg.ai_st3;
-  let status4 = msg.ai_st4;
+  let ahealth = 0;
+  let bhealth = 0;
+  let chealth = 0;
+  let dhealth = 0;
+  let health = 0;
 
-  let voltage = input2 * 5.0;
-  voltage /= 256.0;
-  voltage = (voltage - 0.6) * 46;
-  let temp = Math.round(-voltage);
+  let moisture = getMois();
 
-  let ph = input4 * 5.0 / 1024.0 / 6;
-  ph = 3.5 * ph + 7;
-  ph = Math.round(ph);
+  let temp = getTemp();
+
+  let waterLv = getWaterLV();
+
+  let ph = getPhLV();
+
+  if (moisture > 30)
+    ahealth = 100;
+  else if (moisture > 25 && moisture < 30)
+    ahealth = 75;
+  else if (moisture > 20 && moisture < 25)
+    ahealth = 50;
+  else if (moisture > 20 && moisture < 25)
+    ahealth = 25;
+
+  if (temp > 25 && temp < 30)
+    bhealth = 100;
+  else if (temp > 30)
+    bhealth = 75;
+  else if (temp < 25)
+    bhealth = 50;
+
+  if (waterLv > 20)
+    chealth = 100;
+  else if (moisture > 10 && moisture < 20)
+    chealth = 75;
+  else if (moisture < 10)
+    chealth = 25;
+
+  if (ph > 7 && ph < 8.5)
+    dhealth = 100;
+  else if (moisture > 6 && moisture < 7)
+    dhealth = 75;
+  else if (moisture > 8.5 && moisture < 9.5)
+    dhealth = 75;
+  else if (moisture < 6)
+    dhealth = 25;
+  else if (moisture > 9.5)
+    dhealth = 25;
+
+  health = (ahealth + bhealth + chealth + dhealth) / 4;
+
+  logger('Moisture: ' + moisture + ' Temperature: ' + temp + ' Water Level: ' + waterLv + ' PH: ' + ph);
 
   if (time != null) {
     try {
-      await pool.query(sqlWriteValue, [time, input1, temp, input3, ph]);
+      await pool.query(sqlWriteValue, [time, moisture, temp, waterLv, ph, health]);
     } catch (err) {
       console.error('Error adding data...', err.stack);
     }
@@ -79,9 +119,71 @@ client.on('error', err => logger(err));
 client.on('close', () => logger('[MQTT]: close'));
 client.on('offline', () => logger("[MQTT]: offline"));
 
+//xxxdata
+let mois = 34;
+let temp = 28;
+let wlv = 22;
+let plv = 8.7;
+
+function getRand() {
+  return ((Math.random() * 10) + 1);
+}
+
+function getTime(){
+  let d = new Date();
+  console.log(d.getHours());
+  return(d.getHours());
+}
+
 // Helper function
 function logger(s) {
   console.log(Date() + ' -- ' + s);
+}
+
+function getMois() {
+
+  if (getRand() > 5) {
+    if (getRand() % 2 == 0)
+      return mois + (getRand() / 10);
+    else
+      return mois - (getRand() / 10);
+  }
+  else
+    return mois;
+
+}
+
+function getTemp() {
+
+  if(getTime() >= 0 && getTime() < 4)
+     return temp - 2;
+  else if(getTime() > 4 && getTime() < 6)
+    return temp - 1;
+  else if(getTime() > 6 && getTime() < 8)
+    return temp + 1;
+  else if(getTime() > 8)
+    return temp + 2;
+
+}
+
+function getWaterLV() {
+
+  if (getRand() > 5) {
+    if (getRand() % 2 == 0)
+      return wlv + (getRand() / 10);
+    else
+      return wlv - (getRand() / 10);
+  }
+  else
+    return wlv;
+
+
+}
+
+function getPhLV() {
+
+  return plv;
+
 }
 
 app.get('/', async (req, res) => {
@@ -89,6 +191,12 @@ app.get('/', async (req, res) => {
   res.status(200).send('Working fine.');
 
 });
+
+app.use(cors());
+
+// Configuring body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // Creates the schema and table and sets the permission base on 'group'
 app.get('/create_table', async (req, res) => {
@@ -132,16 +240,10 @@ app.get('/get_data/:param', async (req, res) => {
 
 });
 
-// app.get('/temps', async (req, res) => {
-//   try {
-//     const result = await pool.query(sqlQueryTemps);
+app.post('/api/data', async(req ,res) => {
 
-//     result.rows.map(row => {
-//       row.timestamp = moment(row.timestamp).format('MM-DD HH:mm:ss');
-//     });
+  const data = req.body;
 
-//     res.send({ temperatures: result.rows });
-//   } catch (err) {
-//     console.error('Error executing query...', err.stack);
-//   }
-// });
+  console.log(data);
+
+});
